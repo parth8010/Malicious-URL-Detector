@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Malware Scanner</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- PAGE 1: URL Input Screen -->
+    <div id="page1" class="page active">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>URL Guard</h1>
+            </div>
+            <p class="subtitle">Scan any URL for malware & phishing threats</p>
+        </div>
+
+        <div class="scanner-section">
+            <div class="current-url">
+                <h2><i class="fas fa-globe"></i> Current Page</h2>
+                <div class="url-display" id="currentUrl">Loading...</div>
+            </div>
+
+            <div class="manual-scan">
+                <h2><i class="fas fa-search"></i> Manual Scan</h2>
+                <div class="input-group">
+                    <input type="text" 
+                           id="manualUrl" 
+                           placeholder="Enter URL (e.g., https://example.com)"
+                           value="">
+                    <button id="scanManualBtn" class="scan-btn">
+                        <i class="fas fa-search"></i> Scan URL
+                    </button>
+                </div>
+            </div>
+
+            <button id="scanCurrentBtn" class="scan-btn primary">
+                <i class="fas fa-shield-alt"></i> Scan Current Page
+            </button>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Scans use Machine Learning, Google Safe Browsing, VirusTotal, and WHOIS analysis</p>
+            </div>
+        </div>
+
+        <div class="recent-scans">
+            <h3><i class="fas fa-history"></i> Recent Scans</h3>
+            <div id="recentList" class="recent-list">
+                <!-- Recent scans will be loaded here -->
+                <div class="empty-state">No recent scans</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: Results Screen -->
+    <div id="page2" class="page">
+        <div class="results-header">
+            <button id="backBtn" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div class="scanned-url">
+                <i class="fas fa-link"></i>
+                <span id="scannedUrlText">https://example.com</span>
+            </div>
+        </div>
+
+        <div class="scan-status">
+            <div class="status-indicator" id="statusIndicator">
+                <div class="spinner"></div>
+                <span>Scanning in progress...</span>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <!-- Model Prediction -->
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-title">
+                        <i class="fas fa-brain"></i>
+                        <h3>Model Prediction</h3>
+                    </div>
+                    <div class="result-badge pending" id="modelBadge">Analyzing</div>
+                </div>
+                <p class="result-desc">ML model analyzing URL patterns</p>
+                <div class="result-details" id="modelDetails">
+                    <div class="detail-item">
+                        <span>Pattern Analysis:</span>
+                        <span class="detail-value">Processing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Safe Browsing -->
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-title">
+                        <i class="fab fa-google"></i>
+                        <h3>Google Safe Browsing</h3>
+                    </div>
+                    <div class="result-badge pending" id="googleBadge">Checking</div>
+                </div>
+                <p class="result-desc">Google's malware & phishing database</p>
+                <div class="result-details" id="googleDetails">
+                    <div class="detail-item">
+                        <span>Database Status:</span>
+                        <span class="detail-value">Querying...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VirusTotal -->
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-title">
+                        <i class="fas fa-virus"></i>
+                        <h3>VirusTotal</h3>
+                    </div>
+                    <div class="result-badge pending" id="virusBadge">Scanning</div>
+                </div>
+                <p class="result-desc">Multi-engine antivirus scanner</p>
+                <div class="result-details" id="virusDetails">
+                    <div class="detail-item">
+                        <span>Engines:</span>
+                        <span class="detail-value">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WHOIS -->
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-title">
+                        <i class="fas fa-database"></i>
+                        <h3>WHOIS</h3>
+                    </div>
+                    <div class="result-badge pending" id="whoisBadge">Looking up</div>
+                </div>
+                <p class="result-desc">Domain registration information</p>
+                <div class="result-details" id="whoisDetails">
+                    <div class="detail-item">
+                        <span>Domain Age:</span>
+                        <span class="detail-value">Checking...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Verdict -->
+        <div class="final-verdict">
+            <div class="verdict-header">
+                <h3><i class="fas fa-gavel"></i> Final Verdict</h3>
+                <div class="confidence" id="confidenceScore">Confidence: --%</div>
+            </div>
+            <div class="verdict-result">
+                <div class="verdict-icon" id="verdictIcon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="verdict-text">
+                    <h2 id="verdictTitle">Scanning...</h2>
+                    <p id="verdictDesc">Analysis in progress</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="blockBtn" class="action-btn danger" disabled>
+                    <i class="fas fa-ban"></i> Block Site
+                </button>
+                <button id="reportBtn" class="action-btn secondary" disabled>
+                    <i class="fas fa-flag"></i> Report False Positive
+                </button>
+                <button id="rescanBtn" class="action-btn">
+                    <i class="fas fa-redo"></i> Rescan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
